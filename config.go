@@ -3,11 +3,9 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
+	"github.com/TBXark/confstore"
 	"github.com/docker/docker/api/types/registry"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -41,29 +39,11 @@ type Config struct {
 }
 
 func loadConfig(path string) (*Config, error) {
-	var body []byte
-	var err error
 
-	if strings.HasPrefix(path, "http") {
-		resp, httpErr := http.Get(path)
-		if httpErr != nil {
-			return nil, fmt.Errorf("failed to fetch config: %w", httpErr)
-		}
-		defer resp.Body.Close()
-		body, err = io.ReadAll(resp.Body)
-	} else {
-		body, err = os.ReadFile(path)
-	}
-
+	config, err := confstore.Load[Config](path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config: %w", err)
+		return nil, err
 	}
-
-	config := &Config{}
-	if e := json.Unmarshal(body, config); e != nil {
-		return nil, fmt.Errorf("failed to parse config: %w", e)
-	}
-
 	if config.Auths == nil || len(config.Auths) == 0 {
 		log.Printf("No auths found in config, loading default auth")
 		config.Auths = loadDefaultAuth()

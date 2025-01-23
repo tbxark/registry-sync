@@ -2,7 +2,10 @@ module github.com/TBXark/registry-sync
 
 go 1.23.0
 
-require github.com/docker/docker v27.2.1+incompatible
+require (
+	github.com/TBXark/confstore v0.0.0-20250123065822-f224518502e3
+	github.com/docker/docker v27.2.1+incompatible
+)
 
 require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect
@@ -26,7 +29,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.30.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.30.0 // indirect
 	go.opentelemetry.io/otel/trace v1.30.0 // indirect
-	golang.org/x/sync v0.8.0
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
