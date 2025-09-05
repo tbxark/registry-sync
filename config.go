@@ -1,14 +1,21 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/TBXark/confstore"
-	"github.com/docker/docker/api/types/registry"
+	"errors"
 	"log"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/docker/docker/api/types/registry"
+	"github.com/go-sphere/confstore"
+	"github.com/go-sphere/confstore/codec"
+	"github.com/go-sphere/confstore/provider"
+	"github.com/go-sphere/confstore/provider/file"
+	"github.com/go-sphere/confstore/provider/http"
 )
 
 type RegistryAuth struct {
@@ -38,13 +45,26 @@ type Config struct {
 	DisablePrune bool                    `json:"disable_prune"`
 }
 
-func loadConfig(path string) (*Config, error) {
+func newProvider(path string) (provider.Provider, error) {
+	if http.IsRemoteURL(path) {
+		return http.New(path, http.WithTimeout(10)), nil
+	}
+	if file.IsLocalPath(path) {
+		return file.New(path, file.WithExpandEnv()), nil
+	}
+	return nil, errors.New("unsupported config path")
+}
 
-	config, err := confstore.Load[Config](path)
+func loadConfig(path string) (*Config, error) {
+	pro, err := newProvider(path)
 	if err != nil {
 		return nil, err
 	}
-	if config.Auths == nil || len(config.Auths) == 0 {
+	config, err := confstore.Load[Config](context.Background(), pro, codec.JsonCodec())
+	if err != nil {
+		return nil, err
+	}
+	if len(config.Auths) == 0 {
 		log.Printf("No auths found in config, loading default auth")
 		config.Auths = loadDefaultAuth()
 	} else {

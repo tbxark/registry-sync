@@ -3,8 +3,8 @@ module github.com/TBXark/registry-sync
 go 1.23.0
 
 require (
-	github.com/TBXark/confstore v0.0.0-20250123065822-f224518502e3
 	github.com/docker/docker v28.0.0+incompatible
+	github.com/go-sphere/confstore v0.0.2
 )
 
 require (

@@ -38,7 +38,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create Docker client: %v", err)
 	}
-	defer cli.Close()
+	defer func() {
+		_ = cli.Close()
+	}()
 
 	for {
 		if e := processImages(cli, config); e != nil {
@@ -86,7 +88,9 @@ func processImages(cli *client.Client, config *Config) error {
 }
 
 func readAllToDiscard(r io.ReadCloser) error {
-	defer r.Close()
+	defer func() {
+		_ = r.Close()
+	}()
 	_, e := io.Copy(io.Discard, r)
 	return e
 }

@@ -1,4 +1,5 @@
 BUILD_DIR=./build
+MODULE := $(shell go list -m)
 BUILD=$(shell git rev-parse --short HEAD)@$(shell date +%s)
 CURRENT_OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 CURRENT_ARCH := $(shell uname -m | tr '[:upper:]' '[:lower:]')
@@ -17,3 +18,14 @@ buildLinuxX86:
 .PHONY: buildImage
 buildImage:
 	docker buildx build --platform=linux/amd64,linux/arm64 -t ghcr.io/tbxark/registry-sync:latest . --push --provenance=false
+
+.PHONY: lint
+lint:
+	go fmt ./...
+	go vet ./...
+	go get ./...
+	go test ./...
+	go mod tidy
+	golangci-lint fmt --no-config --enable gofmt,goimports
+	golangci-lint run --no-config --fix
+	nilaway -include-pkgs="$(MODULE)" ./...
