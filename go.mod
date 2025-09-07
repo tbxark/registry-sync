@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/docker/docker v28.0.0+incompatible
-	github.com/go-sphere/confstore v0.0.2
+	github.com/go-sphere/confstore v0.0.3
 )
 
 require (

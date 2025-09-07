@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -56,11 +55,19 @@ func newProvider(path string) (provider.Provider, error) {
 }
 
 func loadConfig(path string) (*Config, error) {
-	pro, err := newProvider(path)
+	prov, err := provider.Selector(
+		path,
+		provider.If(file.IsLocalPath, func(s string) provider.Provider {
+			return file.New(path, file.WithExpandEnv())
+		}),
+		provider.If(http.IsRemoteURL, func(s string) provider.Provider {
+			return http.New(path, http.WithTimeout(10))
+		}),
+	)
 	if err != nil {
 		return nil, err
 	}
-	config, err := confstore.Load[Config](context.Background(), pro, codec.JsonCodec())
+	config, err := confstore.Load[Config](prov, codec.JsonCodec())
 	if err != nil {
 		return nil, err
 	}
