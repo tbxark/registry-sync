@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"log"
 	"os"
 	"path"
@@ -42,16 +41,6 @@ type Config struct {
 	Auths        map[string]RegistryAuth `json:"auths"`
 	Duration     int                     `json:"duration"`
 	DisablePrune bool                    `json:"disable_prune"`
-}
-
-func newProvider(path string) (provider.Provider, error) {
-	if http.IsRemoteURL(path) {
-		return http.New(path, http.WithTimeout(10)), nil
-	}
-	if file.IsLocalPath(path) {
-		return file.New(path, file.WithExpandEnv()), nil
-	}
-	return nil, errors.New("unsupported config path")
 }
 
 func loadConfig(path string) (*Config, error) {
