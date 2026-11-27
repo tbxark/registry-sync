@@ -64,7 +64,7 @@ func loadConfig(path string) (*Config, error) {
 		log.Printf("No auths found in config, loading default auth")
 		config.Auths = loadDefaultAuth()
 	} else {
-		log.Printf("Found auths in config: %+v", config.Auths)
+		log.Printf("Found %d registry auth entries in config", len(config.Auths))
 		auths := make(map[string]RegistryAuth)
 		for i, auth := range config.Auths {
 			if auth.Auth == "" {
@@ -74,13 +74,12 @@ func loadConfig(path string) (*Config, error) {
 				}
 				authStr, e := registry.EncodeAuthConfig(authConfig)
 				if e != nil {
-					log.Printf("Failed to encode auth for %s: %v", auth.Username, e)
+					log.Print("Failed to encode configured registry auth")
 					continue
 				}
 				auths[i] = RegistryAuth{
 					Auth: authStr,
 				}
-				log.Printf("Encoded auth for %s", auth.Auth)
 			} else {
 				auths[i] = auth
 			}
